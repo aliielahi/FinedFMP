@@ -34,8 +34,11 @@ def calculate_past_dates(date_str):
     return date_1_months.strftime('%Y-%m-%d'), date_3_months.strftime('%Y-%m-%d'), date_6_months.strftime('%Y-%m-%d')
 
 def get_target(company_ticker, qdate, binn = False):
-    historical_data = pd.read_csv(historic_data_path+company_ticker+dotcsv)
-    historical_data['Date'] = pd.to_datetime(historical_data['Date'])
+    try: 
+        historical_data = pd.read_csv(historic_data_path+company_ticker+dotcsv)
+        historical_data['Date'] = pd.to_datetime(historical_data['Date'])
+    except:
+        return -1
     
     mo1, mo3, mo6 = calculate_future_dates(qdate)
     fil0 = np.array(historical_data[historical_data['Date'] >= pd.to_datetime(qdate)]['Close'])[0]
@@ -95,9 +98,26 @@ def historic_moving_average_6m(company_ticker, qdate):
 
         fil0 = historical_data[historical_data['Date'] <= pd.to_datetime(end_date)]
         fil0 = fil0[fil0['Date'] >= pd.to_datetime(start_date)]
+        # print('from', start_date, 'to', end_date, 'datapoints: ', len(fil0), 'mean price:', np.mean(fil0['Close']))
+        moving_avgs.append(np.nanmean(fil0['Close']))
+        end_date = start_date
+    return moving_avgs[::-1]
+
+
+def historic_moving_std_6m(company_ticker, qdate):
+    moving_avgs = []
+    historical_data = pd.read_csv(historic_data_path+company_ticker+dotcsv)
+    historical_data['Date'] = pd.to_datetime(historical_data['Date'])
+    end_date = datetime.strptime(qdate, '%Y-%m-%d')
+    
+    for i in range(6):
+        start_date = end_date + relativedelta(months=-1)
+
+        fil0 = historical_data[historical_data['Date'] <= pd.to_datetime(end_date)]
+        fil0 = fil0[fil0['Date'] >= pd.to_datetime(start_date)]
         
         # print('from', start_date, 'to', end_date, 'datapoints: ', len(fil0), 'mean price:', np.mean(fil0['Close']))
-        moving_avgs.append(np.mean(fil0['Close']))
+        moving_avgs.append(np.std(fil0['Close']))
         end_date = start_date
     return moving_avgs[::-1]
 
@@ -114,7 +134,7 @@ def historic_vol_moving_average_6m(company_ticker, qdate):
         fil0 = fil0[fil0['Date'] >= pd.to_datetime(start_date)]
         
         # print('from', start_date, 'to', end_date, 'datapoints: ', len(fil0), 'mean price:', np.mean(fil0['Close']))
-        moving_avgs.append(np.mean(fil0['Volume']))
+        moving_avgs.append(np.nanmean(fil0['Volume']))
         end_date = start_date
     return moving_avgs[::-1]
 

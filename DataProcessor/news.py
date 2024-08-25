@@ -20,10 +20,13 @@ news_CMINUS_path = '../dataset/News Articles/CMIN-US/'
 dotcsv = '.csv'
 
 def historic_news_wsj(ticker, qdate, time_frame = '3m'):
-    data = pd.read_csv(news_wsj_path+ticker+dotcsv)
-    data = data.rename(columns={'Title': 'headline', 'Abstract': 'abstract', 'PubDate': 'pub_date'})    
-    data['pub_date'] = pd.to_datetime(data['pub_date'])
-
+    try:
+        data = pd.read_csv(news_wsj_path+ticker+dotcsv)
+        data = data.rename(columns={'Title': 'headline', 'Abstract': 'abstract', 'PubDate': 'pub_date'})    
+        data['pub_date'] = pd.to_datetime(data['pub_date'])
+    except:
+        print(ticker, qdate, 'error occured reading wsj')
+        return []
     data.sort_values(by='pub_date')
     end_date = datetime.strptime(qdate, '%Y-%m-%d')
     if time_frame[-1] == 'm':
@@ -37,12 +40,15 @@ def historic_news_wsj(ticker, qdate, time_frame = '3m'):
     return fil0[['headline', 'abstract', 'pub_date']].to_dict(orient='records')
 
 def historic_news_nyt(ticker, qdate, time_frame = '3m'):
-    data = pd.read_csv(news_nyt_path+ticker+dotcsv)
-    data['pub_date'] = [i[:10] for i in data['pub_date']]
-    data['pub_date'] = pd.to_datetime(data['pub_date'])
-    data.sort_values(by='pub_date')
-    end_date = datetime.strptime(qdate, '%Y-%m-%d')
-    
+    try:
+        data = pd.read_csv(news_nyt_path+ticker+dotcsv)
+        data['pub_date'] = [i[:10] for i in data['pub_date']]
+        data['pub_date'] = pd.to_datetime(data['pub_date'])
+        data.sort_values(by='pub_date')
+        end_date = datetime.strptime(qdate, '%Y-%m-%d')
+    except:
+        print(ticker, qdate, 'error occured reading nyt')
+        return []
     if time_frame[-1] == 'm':
         start_date = end_date + relativedelta(months=-1*int(time_frame[:-1]))
     if time_frame[-1] == 'd':
@@ -55,12 +61,15 @@ def historic_news_nyt(ticker, qdate, time_frame = '3m'):
     return fil0[['headline', 'abstract', 'pub_date']].to_dict(orient='records')
 
 def historic_news_cmin(ticker, qdate, time_frame = '3m'):
-    data = pd.read_csv(news_CMINUS_path+ticker+dotcsv, sep='\t')
-    data = data.rename(columns={'title': 'headline', 'summary': 'abstract', 'date': 'pub_date'})
-    data['pub_date'] = pd.to_datetime(data['pub_date'])
-    data.sort_values(by='pub_date')
-    end_date = datetime.strptime(qdate, '%Y-%m-%d')
-    
+    try:
+        data = pd.read_csv(news_CMINUS_path+ticker+dotcsv, sep='\t')
+        data = data.rename(columns={'title': 'headline', 'summary': 'abstract', 'date': 'pub_date'})
+        data['pub_date'] = pd.to_datetime(data['pub_date'])
+        data.sort_values(by='pub_date')
+        end_date = datetime.strptime(qdate, '%Y-%m-%d')
+    except:
+        print(ticker, qdate, 'error occured reading cmin')
+        return []
     if time_frame[-1] == 'm':
         start_date = end_date + relativedelta(months=-1*int(time_frame[:-1]))
     if time_frame[-1] == 'd':
@@ -72,11 +81,15 @@ def historic_news_cmin(ticker, qdate, time_frame = '3m'):
     return fil0[['headline', 'abstract', 'pub_date']].to_dict(orient='records')
 
 def historic_news_alphav(ticker, qdate, time_frame = '3m', with_sentiment = False):
-    data = pd.read_csv(news_alphav_path+ticker+dotcsv)
-    data = data.rename(columns={'title': 'headline', 'summary': 'abstract', 'time_published': 'pub_date'})
-    data['pub_date'] = pd.to_datetime(data['pub_date'])
-    data.sort_values(by='pub_date')
-    end_date = datetime.strptime(qdate, '%Y-%m-%d')
+    try:
+        data = pd.read_csv(news_alphav_path+ticker+dotcsv)
+        data = data.rename(columns={'title': 'headline', 'summary': 'abstract', 'time_published': 'pub_date'})
+        data['pub_date'] = pd.to_datetime(data['pub_date'])
+        data.sort_values(by='pub_date')
+        end_date = datetime.strptime(qdate, '%Y-%m-%d')
+    except:
+        print(ticker, qdate, 'error occured reading alphav')
+        return []
     if time_frame[-1] == 'm':
         start_date = end_date + relativedelta(months=-1*int(time_frame[:-1]))
     if time_frame[-1] == 'd':
