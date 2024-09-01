@@ -2,7 +2,7 @@ from openai import OpenAI
 import numpy as np
 import pandas as pd
 
-
+openapikey1 = ''
 
 class OpenAIEmbedding:
     def __init__(self, openapikey = openapikey1):
