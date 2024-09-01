@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 
 
+
 class OpenAIEmbedding:
     def __init__(self, openapikey = openapikey1):
         
