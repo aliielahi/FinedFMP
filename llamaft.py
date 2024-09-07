@@ -22,11 +22,11 @@ import sys
 
 PARAMS = dict({
 
-	'train_on': [2018, 2019, 2020, 2021, 2022, 2023, 2015, 2016, 2017],
-	'test_on': [2020],
+	'train_on': [2015, 2021, 2017, 2018, 2019, 2020, 2016],
+	'test_on': [2023, 2022, 2024],
 
-	'epochs': 90,
-	'LR': 0.95e-4,
+	'epochs': 64,
+	'LR': 0.8e-4,
 
 	'Pred_period': sys.argv[1],
 	'Zero-Shot': int(sys.argv[2]),
@@ -34,8 +34,9 @@ PARAMS = dict({
 	"save_dir": sys.argv[4]
 	})
 RESULTS = []
-INSTRUCTION = "Based on financial data and news articles about a company we want to predict if the companies stock price is going up or down in 6 months.\
- Analyse the information and answer with either [UP] or [DOWN]."
+INSTRUCTION = "Financial reports data for a specefic company for the past four quarters is given in a tab-separated table bellow. \
+in the table, K, M, and B means thousands, millions, and billions. predict if the stock price is going up or down at the end of the next quarter, in 3 months. \
+Give a one word response with either [UP] or [DOWN]"
 
 """## Installs and Imports"""
 
@@ -170,7 +171,7 @@ def evaluator(test_data, model):
 	print('in evaluator', res)
 	return res
 
-def get_dataset(target, train_years, bin_targets = True, dir = './prompts/'):
+def get_dataset(target, train_years, test_years, bin_targets = True, dir = './prompts/'):
 	train_datas = []
 	test_datas = []
 
@@ -179,14 +180,14 @@ def get_dataset(target, train_years, bin_targets = True, dir = './prompts/'):
 			with open(dir+i, 'rb') as f:
 				data = pickle.load(f)
 				data = [dict(zip(data.keys(), values)) for values in zip(*data.values())]
-
+				
 				for i in data:
 					target_datum = i['targets_bin'][target] if bin_targets else i['targets'][target]
 					target_datum = '[UP]' if target_datum else '[DOWN]'
 					datum = {'instruction': INSTRUCTION, 'input': i['prompts'], 'output': target_datum}
 					if int(i['dates'].split('-')[0]) in train_years:
 						train_datas.append(datum)
-					elif int(i['dates'].split('-')[0]) in PARAMS['test_on']:
+					elif int(i['dates'].split('-')[0]) in test_years:
 						test_datas.append(datum)
 	random.shuffle(train_datas)
 	random.shuffle(test_datas)
@@ -203,8 +204,8 @@ def logger(res, model = 'LLaMA3-8B'):
 """## Model"""
 
 max_seq_length = 2048 # Choose any! We auto support RoPE Scaling internally!
-dtype = torch.float16 #None # None for auto detection. Float16 for Tesla T4, V100, Bfloat16 for Ampere+
-load_in_4bit = False #True # Use 4bit quantization to reduce memory usage. Can be False.
+dtype = None # torch.float16 #None for 4 bit # None for auto detection. Float16 for Tesla T4, V100, Bfloat16 for Ampere+
+load_in_4bit = True #True # Use 4bit quantization to reduce memory usage. Can be False.
 
 # 4bit pre quantized models we support for 4x faster downloading + no OOMs.
 fourbit_models = [
@@ -220,7 +221,7 @@ fourbit_models = [
 ] # More models at https://huggingface.co/unsloth
 
 model, tokenizer = FastLanguageModel.from_pretrained(
-		model_name = "unsloth/Meta-Llama-3.1-8B-Instruct", #"unsloth/llama-3-8b-bnb-4bit",
+		model_name = "unsloth/Meta-Llama-3.1-8B-bnb-4bit", #"unsloth/llama-3-8b-bnb-4bit",
 		max_seq_length = max_seq_length,
 		dtype = dtype,
 		load_in_4bit = load_in_4bit,
@@ -244,13 +245,13 @@ model = FastLanguageModel.get_peft_model(
 
 """## Data Import"""
 
-alpaca_prompt = """You are a financial analyst.
-
+alpaca_prompt = """
 ### Instruction:
 {}
 
 ### Input:
-{} Analyse the trends in the data and answer with [UP] or [DOWN]?
+{}
+Is the stock price going [UP] or [DOWN] 3 months from now?
 
 ### Response:
 {}"""
@@ -268,14 +269,16 @@ def formatting_prompts_func(examples):
 			texts.append(text)
 	return { "text" : texts, }
 
-train_dict, train_dataset, test_dict, test_dataset = get_dataset(target = PARAMS['Pred_period'], train_years = PARAMS['train_on'])
+train_dict, train_dataset, test_dict, test_dataset = \
+	get_dataset(target = PARAMS['Pred_period'], train_years = PARAMS['train_on'], test_years=PARAMS['test_on'])
 dataset = train_dataset.map(formatting_prompts_func, batched = True,)
 print('training data: ', len(train_dict))
 print('testing data: ', len(test_dict))
 print(len(dataset))
 print('n/p ratio for train', np_ratio([i['output'] for i in train_dict]))
 print('n/p ratio for train', np_ratio([i['output'] for i in test_dict]))
-print(dataset[0])
+print(dataset[4]['text'])
+
 """## Train and Evaluate"""
 
 if PARAMS['Zero-Shot']:
@@ -302,8 +305,8 @@ trainer = SFTTrainer(
 				warmup_steps = 5,
 				max_steps = PARAMS['epochs'],
 				learning_rate = PARAMS['LR'],
-				fp16 = True, # not is_bfloat16_supported(),
-				bf16 = False, #is_bfloat16_supported(),
+				fp16 = not is_bfloat16_supported(), # True, # if not 4bit
+				bf16 = is_bfloat16_supported(), #False, # if not 4 bit
 				logging_steps = 1,
 				optim = "adamw_8bit",
 				weight_decay = 0.02,
@@ -319,7 +322,7 @@ if PARAMS['Fine_Tune']:
 if PARAMS['Fine_Tune']:
 	print('testing fine-tuned model ...')
 	# try:
-	res = evaluator(test_dict[:1000], model)
+	res = evaluator(test_dict[:200], model)
 	logger(res, model = 'LLaMA3-8B')
 	# except Exception as e:
 	# 	print('error: fine-tuned on.')
@@ -344,3 +347,5 @@ with open(PARAMS['save_dir'], 'w') as file:
 
 
 
+
+# %%
