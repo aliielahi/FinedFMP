@@ -1,0 +1,7 @@
+pip install -U transformers datasets accelerate peft trl bitsandbytes wandb huggingface_hub
+pip install -qqq flash-attn
+pip install flash-attn --no-build-isolation
+
+pip install xformers
+pip install --no-deps "xformers<0.0.27" "trl<0.9.0" peft accelerate bitsandbytes
+pip install trl bitsandbytes peft
