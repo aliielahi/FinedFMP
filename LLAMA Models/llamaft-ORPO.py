@@ -62,7 +62,8 @@ new_model = "FinLLaMA-3-8B"
 # Set torch dtype and attention implementation
 if torch.cuda.get_device_capability()[0] >= 8:
     torch_dtype = torch.bfloat16
-    attn_implementation = "eager" #"flash_attention_2"
+    attn_implementation = "eager" #"flash_attention_2" flash should be used but
+	                              #      I cannot install it on A100
 else:
     torch_dtype = torch.float16
     attn_implementation = "eager"
