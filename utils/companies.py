@@ -68,5 +68,10 @@ company100_name_shorten = ['Apple', 'Alibaba', 'Chevron', 'Exelon', 'McDonald', 
 
 company100_ticker = ['AAPL', 'BABA', 'CVX', 'EXC', 'MCD', 'PEP', 'SHW', 'UL', 'ABBV', 'BAC', 'D', 'FB', 'MMM', 'PFE', 'SNAP', 'UNH', 'ABT', 'BBL', 'DD', 'FCX', 'MS', 'PG', 'SNPMF', 'UNP', 'ACN', 'BHP', 'DE', 'GE', 'MSFT', 'PLD', 'SO', 'UPS', 'ADBE', 'BP', 'DEO', 'GOOG', 'NEE', 'PM', 'SPG', 'V', 'ADP', 'BRK-A', 'DHR', 'HD', 'NEM', 'PSA', 'SRE', 'VALE', 'AEP', 'C', 'DIS', 'HON', 'NFLX', 'PTR', 'T', 'VZ', 'AMT', 'CAT', 'DLR', 'JD', 'NGG', 'PYPL', 'TGT', 'WELL', 'AMZN', 'CCI', 'DUK', 'JNJ', 'NKE', 'RDS-B', 'TM', 'WFC', 'APD', 'CHTR', 'ECL', 'JPM', 'NVDA', 'RIO', 'TMO', 'WMT', 'ASML', 'CMCSA', 'EL', 'KO', 'NVO', 'RTX', 'TMUS', 'XEL', 'AVGO', 'COP', 'ENB', 'LLY', 'NVS', 'SBAC', 'TSLA', 'XOM', 'AWK', 'COST', 'EQIX', 'LOW', 'O', 'SBUX', 'TSM', 'BA', 'CSCO', 'EQNR', 'MA', 'ORCL', 'SCHW', 'TTE']
 
-
+def getname(ticker):
+    for i in company100_ticker:
+        if ticker == i:
+            return company100_name[i]
+        
+    return "Company X"
 
