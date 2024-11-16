@@ -37,29 +37,30 @@ def get_target(company_ticker, qdate, binn = False):
     try: 
         historical_data = pd.read_csv(historic_data_path+company_ticker+dotcsv)
         historical_data['Date'] = pd.to_datetime(historical_data['Date'])
-    except:
-        return -1
     
-    mo1, mo3, mo6 = calculate_future_dates(qdate)
-    fil0 = np.array(historical_data[historical_data['Date'] >= pd.to_datetime(qdate)]['Close'])[0]
-    fil1d = np.array(historical_data[historical_data['Date'] >= pd.to_datetime(qdate)]['Close'])[1]
-    fil10d = np.array(historical_data[historical_data['Date'] >= pd.to_datetime(qdate)]['Close'])[10]
-    fil1 = np.array(historical_data[historical_data['Date'] >= pd.to_datetime(mo1)]['Close'])[0]
-    fil3 = np.array(historical_data[historical_data['Date'] >= pd.to_datetime(mo3)]['Close'])[0]
-    fil6 = np.array(historical_data[historical_data['Date'] >= pd.to_datetime(mo6)]['Close'])[0]
     
-    change1d, change10d = fil1d / fil0 - 1,\
-                        fil10d / fil0 - 1
-    change1, change3, change6 = fil1 / fil0 - 1,\
-                                fil3 / fil0 - 1,\
-                                fil6 / fil0 - 1
-    if binn:
-        change1d, change10d, change1, change3, change6 = True if change1d > 0 else False,\
-                True if change10d > 0 else False,\
-                True if change1 > 0 else False,\
-                True if change3 > 0 else False,\
-                True if change6 > 0 else False
-    return {'1d': change1d, '10d': change10d, '1m': change1, '3m': change3, '6m': change6}
+        mo1, mo3, mo6 = calculate_future_dates(qdate)
+        fil0 = np.array(historical_data[historical_data['Date'] >= pd.to_datetime(qdate)]['Close'])[0]
+        fil1d = np.array(historical_data[historical_data['Date'] >= pd.to_datetime(qdate)]['Close'])[1]
+        fil10d = np.array(historical_data[historical_data['Date'] >= pd.to_datetime(qdate)]['Close'])[10]
+        fil1 = np.array(historical_data[historical_data['Date'] >= pd.to_datetime(mo1)]['Close'])[0]
+        fil3 = np.array(historical_data[historical_data['Date'] >= pd.to_datetime(mo3)]['Close'])[0]
+        fil6 = np.array(historical_data[historical_data['Date'] >= pd.to_datetime(mo6)]['Close'])[0]
+    
+        change1d, change10d = fil1d / fil0 - 1,\
+                            fil10d / fil0 - 1
+        change1, change3, change6 = fil1 / fil0 - 1,\
+                                    fil3 / fil0 - 1,\
+                                    fil6 / fil0 - 1
+        if binn:
+            change1d, change10d, change1, change3, change6 = True if change1d > 0 else False,\
+                    True if change10d > 0 else False,\
+                    True if change1 > 0 else False,\
+                    True if change3 > 0 else False,\
+                    True if change6 > 0 else False
+    except Exception as e:
+        return (-1, e)
+    return (1, {'1d': change1d, '10d': change10d, '1m': change1, '3m': change3, '6m': change6})
 
 def get_momentums(company_ticker, qdate, binn = False):
     historical_data = pd.read_csv(historic_data_path+company_ticker+dotcsv)
