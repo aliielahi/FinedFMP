@@ -19,9 +19,4 @@ python llamaft.py <Prediction period can be 1d, 10d, 1m, 3m, 6m> <Few-shot 0 or 
 DataProcessor/*
 All necessary code to generate promps.
 
-The dataset for this project can be find on: ...
-Put the dataset in the same directory as this project's folder.
-
-To Do:
-    1. Adding FT method using https://llama.meta.com/docs/how-to-guides/fine-tuning/
-    2.Adding FT using Phi, Gemma, Mistral, ... (available on Unsloth)
+The dataset for this project can be find on: ... 
