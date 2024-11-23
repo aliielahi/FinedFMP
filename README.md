@@ -19,4 +19,9 @@ python llamaft.py <Prediction period can be 1d, 10d, 1m, 3m, 6m> <Few-shot 0 or 
 DataProcessor/*
 All necessary code to generate promps.
 
-The dataset for this project can be find on: [Link](https://drive.google.com/file/d/1SL_fTu0AYSc3iSkRtSy4rIdOFn3Cja7k/view) 
+IEEE-BigData paper's dataset: [link](https://drive.google.com/file/d/1NJc2ynah5JFx53c1t9pTo2TY_KGCcoBp/view?usp=sharing)
+  This is the first verrsion of the dataset. It data from contains 20 companies, from 2022-2024.
+
+The *Latest version* dataset for this project can be find on: [Link](https://drive.google.com/file/d/1SL_fTu0AYSc3iSkRtSy4rIdOFn3Cja7k/view) 
+  This dataset contains news data, Financial report (tables) data, historical price data, for more than 100 (high trading volum) companies from 2014-2024.
+  List of news websites: WSJ, NYT and a few other sources. Also, CMIN dataset's news are attached to this dataset.
